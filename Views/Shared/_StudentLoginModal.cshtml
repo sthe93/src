@@ -1,0 +1,49 @@
+﻿@model UJStudentGorvenanceStudentWeb.Models.StudentLoginViewModel
+
+<div class="container mt-5">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+
+  
+<!-- Student Login Modal -->
+<div class="modal fade" id="studentLoginModal" tabindex="-1" aria-labelledby="studentLoginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentLoginModalLabel">Student Life And Governance Log in</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img src="@Url.Content("~/images/ujLogo.png")" alt="Student Life and Governance" class="img-fluid">
+                <div id="loginErrorMessage" class="alert alert-danger d-none"></div>
+                    <form id="studentLoginForm" method="post" autocomplete="off">
+                    <input type="hidden" id="selectedApplicationType" name="selectedApplicationType" value="">
+                    <div class="mb-3">
+                        <label for="studentNumber"><i class="fas fa-user"></i> Student Number</label>
+                            <input type="text" class="form-control" id="studentNumber" name="studentNumber" placeholder="Student Number" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="idNumber"><i class="fas fa-lock"></i> ID/Passport Number</label>
+                        <div class="input-group">
+                                <input type="text" class="form-control" id="idNumber" name="idNumber" placeholder="ID Number" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>

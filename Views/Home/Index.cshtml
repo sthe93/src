@@ -1,0 +1,143 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Main Content Section -->
+<div class="container">
+    <div class="page-inner">
+        <div class="row">
+            <!-- Trust Fund Card -->
+            <div class="col-6">
+                <div class="card d-block flex-fill h-100">
+                    <div class="card-header">
+                        <h6>I want to apply for</h6>
+                        <h4>Student Representative Council Inclusivity Fund</h4>
+                    </div>
+                    <div class="card-body cb scroll">
+                        <p>
+                            The Inclusivity Fund is mainly an amount of money set aside and administered by the University to assist students
+                            in financial difficulties. The funds can and will be granted as per the specific needs of students and in accordance
+                            with the guidelines as prescribed in this document. The available funds are fairly limited and are existent chiefly
+                            to provide supplementary support to students in genuine financial difficulties.
+                        </p>
+                        <p>
+                            Financial assistance from the fund is not a loan and therefore neither the principal amount nor any interest is repayable
+                            to the University at the end of the academic year in which the assistance was granted. The University of Johannesburg
+                            has established a Inclusivity fund to assist needy students primarily with, but not limited to, registration fees.
+                        </p>
+                        <p>
+                            However much the Inclusivity Fund is a source of financial assistance to students, it must not be seen or misconstrued as the
+                            primary source of funding for any student. The sole purpose of the Fund is to assist financially needy students.
+                        </p>
+                    </div>
+                    <button id="btnApplyGrant" class="btn btn-primary apply-btn loading-state"
+                            data-bs-toggle="modal"
+                            data-bs-target="#applyModal"
+                            data-pdf-url="@Url.Content("~/documents/fund.pdf")"
+                            data-application-type="Student Representative Council Trust Fund"
+                            style="display: none;">
+                        Apply
+                    </button>
+                </div>
+            </div>
+
+            <!-- Meal Assistance Card -->
+            <div class="col-6">
+                <div class="card d-block flex-fill h-100">
+                    <div class="card-header">
+                        <h6>I want to apply for</h6>
+                        <h4>Meal Assistance</h4>
+                    </div>
+                    <div class="card-body cb scroll">
+                        <p>
+                            Meal Assistance is provided to students from impoverished backgrounds with hot meals every day. This program covers
+                            students not receiving meal assistance from any University Department or Faculty.
+                        </p>
+                        <p>
+                            The goal of the Meal Assistance Programme is to aid students who are not funded by the National Student Financial Aid
+                            Scheme or any University meal assistance. The programme addresses food insecurity among students.
+                        </p>
+                        <p>
+                            To address the increasing number of hungry students, the University has implemented a food kitchen across its campuses.
+                            Delays and inefficiencies with NSFAS funds and food vouchers prompted the University to establish this feeding scheme.
+                        </p>
+                    </div>
+                    <button id="btnApplyMeal" class="btn btn-primary apply-btn loading-state"
+                            data-bs-toggle="modal"
+                            data-bs-target="#applyModal"
+                            data-pdf-url="@Url.Content("~/documents/meal.pdf")"
+                            data-application-type="Meal Assistance"
+                            style="display: none;">
+                        Apply
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login and Referral Buttons -->
+        <div class="row mt-4 text-center">
+            <div class="col">
+                <div class="mb-2">
+                    <span>I have already applied</span><br>
+                    <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#studentLoginModal">Log In</a>
+                </div>
+                <div class="mb-2">
+                    <span>Staff Only</span><br>
+                    <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staffLoginModal">Refer Student</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Main Content Section -->
+<!-- Apply Modal -->
+<div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="applyModalLabel">Application Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <embed id="pdfViewer" src="#" type="application/pdf" width="100%" height="600px" />
+                <div class="mt-3 form-check">
+                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                    <label class="form-check-label" for="termsCheck">I accept the terms and conditions.</label>
+                </div>
+                <div id="applyFormAlert" aria-live="polite" aria-atomic="true"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="submitApplication">OK</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_StudentLoginModal")
+@await Html.PartialAsync("_StaffLoginModal")
+
+<!-- Hidden fields to store URLs -->
+<div id="urls"
+     data-is-application-open="@Url.Action("IsApplicationOpen", "Home")"
+     data-is-student-admitted="@Url.Action("IsStudentAdmitted", "StudentAccount")"
+     data-set-application-type="@Url.Action("SetApplicationType", "Application")">
+</div>
+
+<!-- Custom Styles -->
+<style>
+    .modal-body img {
+        display: block;
+        margin: 0 auto 20px;
+        max-width: 200px;
+    }
+
+    .scroll {
+        overflow-y: auto;
+    }
+</style>
+
+@section Scripts {
+    <script src="~/assets/js/custom/index.js"></script>
+}

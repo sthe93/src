@@ -1,0 +1,196 @@
+﻿@model List<UJStudentGorvenanceStudentWeb.Models.ApplicationDto>
+
+@{
+    ViewData["Title"] = "Submitted Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Debug information
+    var studentNumber = ViewBag.StudentNumber as string;
+    var studentName = ViewBag.StudentName as string;
+    var applicationType = ViewBag.ApplicationType as string;
+    var isLoginOnlyFlow = ViewBag.IsLoginOnlyFlow as bool? ?? false;
+
+    // Group applications by type for better organization
+    var groupedApplications = Model?.GroupBy(a => a.ApplicationType)
+                                    .Select(g => new
+                                    {
+                                        ApplicationType = g.Key,
+                                        DisplayName = g.FirstOrDefault()?.DisplayApplicationType ?? g.Key,
+                                        Applications = g.ToList()
+                                    })
+                                    .ToList();
+}
+
+<div class="page-inner">
+    <div class="row">
+        <div class="col-12 col-md-8 offset-md-2">
+            <!-- Debug Info (visible only in development) -->
+            <div class="alert alert-info d-none">
+                <h5>Debug Information</h5>
+                <p>Student: @studentNumber (@studentName)</p>
+                <p>Application Type Filter: @applicationType</p>
+                <p>Is Login-Only Flow: @isLoginOnlyFlow</p>
+                <p>Total Applications: @(Model?.Count ?? 0)</p>
+                <p>Grouped Applications: @(groupedApplications?.Count ?? 0) groups</p>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Submitted Applications <span id="applicationTypeDisplay"></span></h4>
+                   @*  <div class="card-subtitle">
+                        Student: @studentNumber
+                    </div> *@
+                </div>
+                <div class="card-body">
+                    @if (groupedApplications != null && groupedApplications.Count > 0)
+                    {
+                        var firstApplication = groupedApplications.First().Applications.FirstOrDefault();
+                        if (firstApplication != null)
+                        {
+                            <div class="mb-4">
+                                <h3>Personal Information</h3>
+                                <ul class="list-unstyled">
+                                    <li><strong>Initials and Surname:</strong> @firstApplication.StudentName</li>
+                                    <li><strong>Student Number:</strong> @firstApplication.StudentNumber</li>
+                                    <li><strong>ID/Passport No:</strong> @firstApplication.StudentIdNumber</li>
+                                </ul>
+                            </div>
+                        }
+
+                        <!-- Display each application type in its own section -->
+                        @foreach (var group in groupedApplications)
+                        {
+                            <div class="application-type-section mb-4">
+                                <h5 class="mb-3" style="color: #F46523;">
+                                    <i class="fas fa-folder"></i> @group.DisplayName Applications
+                                    <small class="text-muted">(@group.Applications.Count application(s))</small>
+                                </h5>
+
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                     @*        <th>Application ID</th> *@
+                                            <th>Application Year</th>
+                                            <th>Date Created</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var application in group.Applications)
+                                        {
+                                            <tr class="application-row" data-application-id="@application.ApplicationId">
+                                                @* <td>@application.ApplicationId</td> *@
+                                                <td>@application.ApplicationYear</td>
+                                                <td>@application.CreatedOnDate.ToString("yyyy-MM-dd")</td>
+                                                <td>
+                                                    <span class="badge
+                                                                    @(application.Status == "Approved" ? "bg-success" :
+                                                                                                                    application.Status == "Declined" ? "bg-danger" :
+                                                                                                                    application.Status == "Pending document re-upload" ? "bg-warning" :
+                                                                                                                    "bg-secondary")">
+                                            @application.Status
+                                        </span>
+                                        @if (application.Status == "Pending document re-upload" && !string.IsNullOrEmpty(application.SentBackReason))
+                                                    {
+                                                        <br />
+                                                        <small class="text-danger mt-1 d-block">
+                                                            <i class="fas fa-exclamation-circle"></i> @application.SentBackReason
+                                                        </small>
+                                                    }
+                                                    @* <div class="decline-reasons mt-1"></div> *@
+                                                    <span class="decline-reasons" style="color: red;"></span>
+                                                </td>
+                                                <td>
+                                                    <a class="btn btn-sm btn-primary"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#detailsModal"
+                                                       data-application-id="@application.ApplicationId"
+                                                       data-application-status="@application.Status">
+                                                        <i class="fas fa-eye"></i> Preview/<br>
+                                                        <i class="fas fa-upload"></i> Re-Upload
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+
+                        <div class="alert alert-info mt-4">
+                            <h5><i class="fas fa-info-circle"></i> Need help with re-uploading documents?</h5>
+                            <p class="mb-0">
+                                <a href="@Url.Content("~/documents/reupload.pdf")" target="_blank" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-download"></i> Click here to view the steps
+                                </a>
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">No submitted applications found</h4>
+                            <p class="text-muted">You haven't submitted any applications yet.</p>
+
+                           
+                        </div>
+                    }
+
+                    <!-- Details Modal (keep your existing modal HTML) -->
+                    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="detailsModalLabel">Document Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Document Type</th>
+                                                <th>File Name</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                    <div id="documentPreview" style="display: none;">
+                                        <iframe id="previewFrame" style="width: 100%; height: 600px;" frameborder="0"></iframe>
+                                        <button id="closePreview" class="btn btn-secondary mb-2">Close Preview</button>
+                                    </div>
+
+                                    <div id="editDocumentSection" style="display: none;">
+                                        <form id="editDocumentForm">
+                                            <input type="hidden" id="editDocumentId" />
+                                            <input type="hidden" id="editApplicationId" />
+                                            <input type="hidden" id="editDocumentTypeId" />
+                                            <input type="hidden" class="form-control" id="editFileName" required />
+                                            <input type="hidden" class="form-control" id="editDocumentStatus" required />
+                                            <div id="declineReasonSection" style="display: none;">
+                                                <h5>Decline Reasons</h5>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="editDocumentFile" class="form-label">Upload New Document</label>
+                                                <input type="file" class="form-control" id="editDocumentFile" />
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Update Document</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/js/custom/submittedApplications.js"></script>
+}

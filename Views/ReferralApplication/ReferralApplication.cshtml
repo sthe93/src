@@ -1,0 +1,201 @@
+﻿ @model List<UJStudentGorvenanceStudentWeb.Models.ReferralApplicationDto>
+
+@{
+    ViewData["Title"] = "Referral Application";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .nav-tabs .nav-link.active {
+        color: #f2651c !important;
+    }
+    .progress-bar-custom {
+        background-color: #f2651c;
+    }
+    .nav-tabs .nav-link {
+        color: #000000;
+    }
+
+
+
+
+</style>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4 class="card-title">Manage Referral Applications</h4>
+                    <ul class="nav nav-tabs mb-3" id="referralFormTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="referral-form-tab" data-bs-toggle="tab" href="#referralForm" role="tab" aria-controls="referralForm" aria-selected="true">Referral Form</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="referral-applications-tab" data-bs-toggle="tab" href="#referralApplications" role="tab" aria-controls="referralApplications" aria-selected="false">Referral Applications</a>
+                        </li>
+                    </ul>
+                </div>
+              
+
+                <div class="card-body">
+                    <div class="tab-content" id="referralFormTabsContent">
+                        <!-- Referral Form tab -->
+                        <div class="tab-pane fade show active" id="referralForm" role="tabpanel" aria-labelledby="referral-form-tab">
+                            <div class="d-flex justify-content-center align-items-center min-vh-100">
+                                <div class="w-50">
+                                 
+                                    <div class="mb-3" id="progressContainer" style="display: none;">
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated progress-bar-custom" role="progressbar" id="progressBar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+
+                                        </div>
+                                    </div>
+                                    <form id="referralFormElement" method="post" enctype="multipart/form-data" autocomplete="off">
+                                        <div class="mb-3">
+                                            <label for="StaffNames" class="form-label">Staff Name & Surname</label>
+                                            <input type="text" class="form-control" id="StaffNames" name="StaffNames" value="@ViewBag.CurrentUserFullName" readonly>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="staffNumber" class="form-label">Staff Number</label>
+                                            <input type="text" class="form-control" id="staffNumber" name="StaffNumber" value="@ViewBag.CurrentUserStaffNumber" readonly>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="studentNumber" class="form-label">Student Number <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="studentNumber" name="StudentNumber" placeholder="Enter Student Number" autocomplete="off">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="applicationType" class="form-label">Application Type <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="applicationType" name="ApplicationType" data-meal-terms="@Url.Content("~/documents/mealterms.pdf")" data-fund-terms="@Url.Content("~/documents/fundterms.pdf")">
+                                                <option value="" disabled selected>Select Application Type</option>
+                                                <option value="Meal Assistance">Meal Assistance</option>
+                                                <option value="Student Representative Council Trust Fund">Student Representative Council Inclusivity Fund</option>
+                                            </select>
+                                        </div>
+
+
+                                        <div class="mb-3">
+                                            <label for="motivation" class="form-label">Motivation <span class="text-danger">*</span></label>
+                                            <textarea class="form-control" id="motivation" name="Motivation" rows="3" placeholder="Enter motivation" autocomplete="off"></textarea>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="studentCardCopy" class="form-label">Student Card Copy <span class="text-danger">*</span></label>
+                                            <input class="form-control" type="file" id="studentCardCopy" name="documents" accept="application/pdf">
+                                            <a href="#" id="studentCardPreviewLink" class="preview-link" style="display: none;">Preview</a>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="supportingDocument" class="form-label">Supporting Document <span class="text-danger">*</span></label>
+                                            <input class="form-control" type="file" id="supportingDocument" name="documents" accept="application/pdf">
+                                            <a href="#" id="supportingDocumentPreviewLink" class="preview-link" style="display: none;">Preview</a>
+                                        </div>
+                                        <div class="mb-3 terms-section">
+                                            <label class="form-label">Terms and Conditions <span class="text-danger">*</span></label>
+                                            <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#termsModal">
+                                                View Terms and Conditions
+                                            </button>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="acceptTerms" name="AcceptTerms">
+                                                <label class="form-check-label" for="acceptTerms">
+                                                    I have read and agree to the Terms and Conditions.
+                                                </label>
+                                            </div>
+                                        </div>
+
+
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="tab-pane fade" id="referralApplications" role="tabpanel" aria-labelledby="referral-applications-tab">
+                            <div class="table-responsive">
+                                <table id="referralApplicationsTable" class="table table-striped table-hover w-100">
+                                    <thead>
+                                        <tr>
+                                            <th>Full Name</th>
+                                            <th>Staff Number</th>
+                                            <th>Student Name</th>
+                                            <th>Student Number</th>
+                                            <th>Motivation</th>
+                                            <th>Last Updated</th>
+                                            <th>Updated By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var application in Model)
+                                        {
+                                            <tr>
+                                                <td>@application.StaffNames</td>
+                                                <td>@application.StaffNumber</td>
+                                                <td>@application.StudentNames</td>
+                                                <td>@application.StudentNumber</td>
+                                                <td>@application.Motivation</td>
+                                                <td>@application.LastUpdated</td>
+                                                <td>@application.UpdatedBy</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewModalLabel">Document Preview</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="previewModalIframe" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="removeDocumentBtn">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" role="dialog" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="termsIframe" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/js/custom/referralForm.js"></script>
+
+}
+
+
+
+
+
+
+

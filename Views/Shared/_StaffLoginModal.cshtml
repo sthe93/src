@@ -1,0 +1,115 @@
+﻿@model UJStudentGorvenanceStudentWeb.Models.LoginViewModel
+
+<div class="container mt-5">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <!-- Staff Login Modal -->
+    <div class="modal fade" id="staffLoginModal" tabindex="-1" aria-labelledby="staffLoginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staffLoginModalLabel">Student Life And Governance Log in - Staff</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="@Url.Content("~/images/ujLogo.png")" alt="Student Life and Governance" class="img-fluid">
+
+                    <form id="staffLoginForm" method="post" autocomplete="off">
+                        <div id="staffloginErrorMessage" class="alert alert-danger d-none"></div>
+                        <div class="mb-3">
+                            <label for="Username"><i class="fas fa-user"></i> Username</label>
+                            <input type="text" class="form-control" id="Username" name="Username" placeholder="Username" autocomplete="off">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Password"><i class="fas fa-lock"></i> Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="Password" name="Password" placeholder="Password" autocomplete="off">
+                                <span class="input-group-text">
+                                    <i class="fas fa-eye" id="togglePassword"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+       $(document).ready(function () {
+        // Clear form when modal is hidden
+        $('#staffLoginModal').on('hidden.bs.modal', function () {
+            clearStaffLoginForm();
+        });
+
+        // Clear form when modal is shown (optional extra security)
+        $('#staffLoginModal').on('show.bs.modal', function () {
+            clearStaffLoginForm();
+        });
+
+        // Function to clear the form
+        function clearStaffLoginForm() {
+            $('#Username').val('');
+            $('#Password').val('');
+            $('#staffloginErrorMessage').addClass('d-none').text('');
+            // Reset password field type to password and eye icon
+            $('#Password').attr('type', 'password');
+            $('#togglePassword').removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+
+        $('#togglePassword').click(function () {
+            const passwordInput = $('#Password');
+            const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+            passwordInput.attr('type', type);
+            $(this).toggleClass('fa-eye-slash');
+        });
+
+        $('#staffLoginForm').on('submit', function (e) {
+            e.preventDefault();
+            $('#staffloginErrorMessage').addClass('d-none').text('');
+
+            const username = $('#Username').val().trim();
+            const password = $('#Password').val().trim();
+
+            if (username === '') {
+                $('#staffloginErrorMessage').removeClass('d-none').text('Username is required.');
+                return;
+            }
+            if (password === '') {
+                $('#staffloginErrorMessage').removeClass('d-none').text('Password is required.');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("Login", "Account")',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        window.location.href = response.redirectUrl;
+                    } else {
+                        // console.log("Error message:", response.errorMessage);
+                        $('#staffloginErrorMessage').removeClass('d-none').text(response.errorMessage);
+                    }
+                },
+                error: function () {
+                    $('#staffloginErrorMessage').removeClass('d-none').text('An error occurred while processing your request.');
+                }
+            });
+        });
+    });
+</script>

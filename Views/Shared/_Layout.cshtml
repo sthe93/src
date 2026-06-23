@@ -1,0 +1,172 @@
+﻿@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>@ViewBag.Title</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="@Url.Content("~/images/logo.png")" type="image/x-icon" />
+    <link rel="stylesheet" href="@Url.Content("~/assets/css/bootstrap.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/assets/css/plugins.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/assets/css/srcstudent.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/assets/css/dataTables.bootstrap5.min.css")" />
+    <script src="@Url.Content("~/assets/js/core/jquery-3.7.1.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/popper.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/core/bootstrap.min.js")"></script>
+    @* <script src="https://kit.fontawesome.com/a076d05399.js"></script> *@
+    <script src="@Url.Content("~/assets/js/custom/config.js")"></script>
+    <script src="@Url.Content("~/assets/js/custom/calculateAge.js")"></script> 
+
+  
+    <script src="@Url.Content("~/assets/js/custom/sessionHandler.js")"></script>
+    <script src="@Url.Content("~/assets/js/custom/showNotification.js")"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Add SweetAlert2 CSS and JS if not already in _Layout.cshtml -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+    <style>
+        .navbar-text-custom {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: auto;
+            text-align: center;
+        }
+            .custom-toast {
+        width:100px; 
+        padding: 10px; 
+        border-radius: 6px; 
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); 
+    }
+        .navbar-header {
+            background-color: #F46523;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .loading-state {
+            cursor: not-allowed !important;
+            opacity: 0.7;
+        }
+
+        .apply-btn:disabled {
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* Smooth transitions for button states */
+        .apply-btn {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+<partial name="SessionModal" />
+<!-- Navbar -->
+<nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+    <div class="container-fluid">
+        <div>
+            <a href="@Url.Action("Index", "Home")" class="navbar-brand">
+                <img src="@Url.Content("~/images/ujLogo.png")" alt="navbar brand" height="100"/>
+            </a>
+        </div>
+        <div>
+            <span class="navbar-text-custom">STUDENT LIFE AND GOVERNANCE</span>
+            <div class="notice-text mt-2">
+                <p style="color: white; font-size: 13px; text-align: center; margin: 0; max-width: 100%;">
+                        If you experience any issues in the system, please <a href="https://forms.office.com/r/qFPKQjgaM9" target="_blank" rel="noopener noreferrer" style="color: #ffcc00; text-decoration: none;">click here</a> to complete a questionnaire to report your issue.
+                </p>
+            </div>
+        </div>
+        <div>
+            <ul class="navbar-nav topbar-nav ms-md-auto">
+                <li class="nav-item">
+                  
+                    <span id="sign-out-btn" class="navbar-text-custom">
+                        @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            var displayName = User.Claims.FirstOrDefault(c => c.Type == "studentName")?.Value
+                                              ?? User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+
+                            <text>Welcome @displayName | </text>
+                            <input type="hidden" id="logout-url" value="@Url.Action("SignOut", "Account")"/>
+                            <a href="#" id="sign-out-btn" style="color:white;">
+                                Sign Out <i class="fas fa-sign-out-alt" style="color:white;"></i>
+                            </a>
+
+                        }
+                    </span>
+
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@RenderBody()
+<footer class="footer">
+    <div class="container-fluid d-flex justify-content-between">
+        <div class="footer-copyright">
+                @System.DateTime.Now.Year <a href="https://www.uj.ac.za/" target="_blank" rel="noopener noreferrer">University of Johannesburg</a>
+        </div>
+        <div>
+            <a href="@Url.Action("Index", "Home")" class="logo">
+                <img src="@Url.Content("~/images/logo.png")" alt="navbar brand" class="navbar-brand" height="70"/>
+            </a>
+        </div>
+    </div>
+</footer>
+<script src="@Url.Content("~/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js")"></script>
+<script src="@Url.Content("~/assets/js/plugin/chart.js/chart.min.js")"></script>
+<script src="@Url.Content("~/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js")"></script>
+<script src="@Url.Content("~/assets/js/plugin/chart-circle/circles.min.js")"></script>
+<script src="@Url.Content("~/assets/js/plugin/datatables/datatables.min.js")"></script>
+<script src="@Url.Content("~/assets/js/plugin/datatables/dataTables.bootstrap5.min.js")"></script>
+<script src="@Url.Content("~/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js")"></script>
+<script src="@Url.Content("~/assets/js/plugin/jsvectormap/jsvectormap.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/plugin/jsvectormap/world.js")"></script>
+<script src="@Url.Content("~/assets/js/plugin/sweetalert/sweetalert.min.js")"></script>
+<script src="@Url.Content("~/assets/js/srcstudent.min.js")"></script>
+    <script src="@Url.Content("~/assets/js/custom/config.js")"></script>
+    <script src="@Url.Content("~/assets/js/custom/showNotification.js")"></script>
+<script>
+            $(document).ready(function () {
+            $('#sign-out-btn').on('click', function (e) {
+                e.preventDefault();
+                var signOutUrl = $('#logout-url').val(); 
+
+                $.ajax({
+                    url: signOutUrl,
+                    type: 'POST',
+                    success: function (response) {
+                        if (response.success) {
+                           
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert('Failed to sign out. Please try again.');
+                        }
+                    },
+                    error: function () {
+                        alert('Error occurred during sign out.');
+                    }
+                });
+            });
+        });
+
+</script>
+ 
+<script>
+            $(document).ready(function () {
+            if (!('@User.Identity.IsAuthenticated')) {
+                
+                $('.error-message').remove();
+            }
+        });
+
+</script>
+@RenderSection("Scripts", required: false)
+</body>
+</html>
+

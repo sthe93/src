@@ -1,0 +1,21 @@
+﻿<div class="modal fade" id="sessionModal" tabindex="-1" role="dialog" aria-labelledby="sessionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sessionModalLabel">Session Expired</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                There has been no activity for 5 minutes. Please sign in to continue.
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="okButton" class="btn btn-primary">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/assets/js/custom/sessionHandler.js"></script>
+}

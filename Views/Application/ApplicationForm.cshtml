@@ -1,0 +1,214 @@
+﻿@model UJStudentGorvenanceStudentWeb.Models.ApplicationFormViewModel
+@{
+    ViewData["Title"] = "Application Form";
+
+
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+
+    .progress-bar-custom {
+        background-color: #f2651c;
+    }
+
+    .preview-link {
+        display: none; 
+        color: #f2651c; 
+        cursor: pointer;
+        text-decoration: underline;
+    }
+</style>
+<script>
+    history.pushState(null, document.title, location.href);
+    window.addEventListener('popstate', function (event) {
+        history.pushState(null, document.title, location.href);
+        showNotification("Back navigation is disabled on this page.");
+    });
+
+    function showNotification(message) {
+        alert(message);
+    }
+
+    // Get application type from URL parameter when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DEBUG: Application Form page loaded, getting application type...');
+
+        // Method 1: Get from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const applicationTypeFromUrl = urlParams.get('applicationType');
+
+        console.log('DEBUG: Application Type from URL:', applicationTypeFromUrl);
+
+        if (applicationTypeFromUrl) {
+            // Set the hidden field
+            $('#applicationType').val(applicationTypeFromUrl);
+
+            // Display the application type
+            $('#applicationTypeDisplay').text(applicationTypeFromUrl);
+
+            console.log('DEBUG: Set applicationType to:', applicationTypeFromUrl);
+            console.log('DEBUG: Set applicationTypeDisplay to:', applicationTypeFromUrl);
+
+            // Also store it in session for future use if needed
+            $.ajax({
+                url: '@Url.Action("SetApplicationType", "Application")',
+                type: 'POST',
+                data: { applicationType: applicationTypeFromUrl },
+                success: function() {
+                    console.log('DEBUG: Application type stored in session');
+                }
+            });
+        } else {
+            // Fallback: Try to get from session
+            console.log('DEBUG: No application type in URL, trying session...');
+            $.ajax({
+                url: '@Url.Action("GetApplicationType", "Application")',
+                type: 'GET',
+                success: function (result) {
+                    console.log("DEBUG: Retrieved Application Type from session:", result.applicationType);
+                    if (result.applicationType) {
+                        $('#applicationType').val(result.applicationType);
+                        $('#applicationTypeDisplay').text(result.applicationType);
+                    } else {
+                        console.log('DEBUG: No application type found anywhere');
+                        $('#applicationTypeDisplay').text("Unknown Application Type");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('DEBUG: Error fetching application type:', error);
+                    $('#applicationTypeDisplay').text("Error Loading Application Type");
+                }
+            });
+        }
+    });
+</script>
+
+<div class="page-inner">
+    <div class="row">
+        <div class="col-12 col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Application Form - <span id="applicationTypeDisplay">Loading...</span></h4>
+                </div>
+                <div class="card-body">
+           
+                    <!-- Progress Bar -->
+                    <div class="mb-3" id="progressContainer" style="display: none;">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated progress-bar-custom" role="progressbar" id="progressBar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+
+                    <form id="applicationForm" method="post" enctype="multipart/form-data" autocomplete="off">
+
+
+                        <div class="mb-3">
+                            <label for="studentName" class="form-label">Initials and Surname</label>
+                            <input type="text" class="form-control" id="studentName" name="studentName" value="@Model.CurrentStudentName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentNumber" class="form-label">Student Number</label>
+                            <input type="text" class="form-control" id="studentNumber" name="studentNumber" value="@Model.CurrentStudentNumber" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentIdNumber" class="form-label">ID/Passport Number</label>
+                            <input type="text" class="form-control" id="studentIdNumber" name="studentIdNumber" value="@Model.CurrentStudentIdNumber" readonly>
+                        </div>
+
+                   
+                      
+                        <input type="hidden" id="applicationType" name="applicationType">
+                        
+                     
+                        <input type="hidden" id="status" name="status" value="Pending">
+
+                        <div class="mb-3">
+                            <label for="guardianshiptType" class="form-label">Guardianship Type <span class="text-danger">*</span></label>
+                            <select class="form-control" id="guardianshiptType" name="guardianshiptType"  onchange="updateDocumentVisibility(this.value)">
+                                <option value="" disabled selected>Select Guardianship Type</option>
+                                @if (Model.GuardianshipTypes != null && Model.GuardianshipTypes.Any())
+                                {
+                                    foreach (var type in Model.GuardianshipTypes.Where(g => !g.IsDeleted))
+                                    {
+                                        <option value="@type.GuardianshipId">@type.GuardianshipType</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="">No guardianship types available</option>
+                                }
+                            </select>
+                        </div>
+
+
+
+
+                        <div class="mb-3">
+                            <label class="form-label">Is your surname the same as your guardian? <span class="text-danger">*</span></label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="isSurnamesTheSame" id="isSurnamesTheSame" value="true" >
+                                    <label class="form-check-label" for="isSurnamesTheSame">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="isSurnamesTheSame" id="isSurnamesTheSame" value="false" >
+                                    <label class="form-check-label" for="isSurnamesTheSame">No</label>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="documentList">
+                            <h2 style="color: #f2651c;">Document List</h2>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Document Type</th>
+                                        <th>File Name</th>
+                                        <th>Status</th>
+                                        <th>Upload (PDF file only, max-size 5MB)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="documentListBody">
+                              
+
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="applicationFormAlert" aria-live="polite" aria-atomic="true"></div>
+
+                        <button type="submit" class="btn btn-primary">Submit</button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewModalLabel">Document Preview</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="previewModalIframe" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="removeDocumentBtn">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/js/custom/applicationform.js"></script>
+
+}
