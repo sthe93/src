@@ -201,6 +201,12 @@ namespace UJStudentGorvenanceStudentWeb.Controllers
 
 
 
+        private static bool IsNoApplicationsResponse(string? message)
+        {
+            return !string.IsNullOrWhiteSpace(message) &&
+                   message.Contains("No applications found", StringComparison.OrdinalIgnoreCase);
+        }
+
         public class ResponseDto<T>
         {
             public string? Message { get; set; }
@@ -224,13 +230,24 @@ namespace UJStudentGorvenanceStudentWeb.Controllers
                     HttpVerb.Get, null, null);
 
                 if (!response.IsValid)
+                {
+                    if (IsNoApplicationsResponse(response.Message))
+                        return (true, false, new List<string>(), "No submitted applications found.");
+
                     return (false, false, null, response.Message ?? "Failed to retrieve student applications.");
+                }
 
                 if (string.IsNullOrEmpty(response.Message))
                     return (false, false, null, "No content returned from the API.");
 
                 var responseObj = JsonConvert.DeserializeObject<ResponseDto<StudentApplicationsDto>>(response.Message);
-                if (responseObj == null || responseObj.Data == null)
+                if (responseObj == null)
+                    return (false, false, null, "Invalid response structure.");
+
+                if (!responseObj.IsValid && IsNoApplicationsResponse(responseObj.Message))
+                    return (true, false, new List<string>(), responseObj.Message ?? "No submitted applications found.");
+
+                if (responseObj.Data == null)
                     return (false, false, null, "Invalid response structure.");
 
                 return (responseObj.IsValid, responseObj.Data.HasApplications, responseObj.Data.ApplicationTypes, responseObj.Message ?? "");

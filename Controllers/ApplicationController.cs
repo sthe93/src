@@ -207,6 +207,11 @@ namespace UJStudentGorvenanceStudentWeb.Controllers
 
                         return View("SubmittedApplications", applications ?? new List<ApplicationDto>());
                     }
+
+                    if (IsNoApplicationsResponse(responseObj?.Message))
+                    {
+                        Console.WriteLine("DEBUG: No submitted applications found; returning empty list without an error message.");
+                    }
                     else
                     {
                         Console.WriteLine($"DEBUG: API response not valid");
@@ -218,6 +223,10 @@ namespace UJStudentGorvenanceStudentWeb.Controllers
                     Console.WriteLine($"DEBUG: Error processing response: {ex.Message}");
                     TempData["ErrorMessage"] = $"Error: {ex.Message}";
                 }
+            }
+            else if (IsNoApplicationsResponse(response.Message))
+            {
+                Console.WriteLine("DEBUG: API returned no applications; returning empty list without an error message.");
             }
             else
             {
@@ -233,6 +242,11 @@ namespace UJStudentGorvenanceStudentWeb.Controllers
             return View("SubmittedApplications", new List<ApplicationDto>());
         }
 
+        private static bool IsNoApplicationsResponse(string? message)
+        {
+            return !string.IsNullOrWhiteSpace(message) &&
+                   message.Contains("No applications found", StringComparison.OrdinalIgnoreCase);
+        }
 
         [HttpGet]
         public Task<IActionResult> GetAllGuardianshipTypes()
